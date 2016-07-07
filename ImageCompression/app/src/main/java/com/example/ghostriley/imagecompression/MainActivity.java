@@ -18,6 +18,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -50,10 +51,14 @@ public class MainActivity extends AppCompatActivity {
         adapter.setDropDownViewResource(R.layout.spinner_layout);
         spinner.setAdapter(adapter);
 
-        final String imageOldPath = Environment.getExternalStorageDirectory().toString() + "/" + "Test" + "/" + "A.jpg";
+        final String imageOldPath = Environment.getExternalStorageDirectory().toString() + "/" + "Test" + "/";
+        final File file = new File(imageOldPath);
+        final File fileList[] = file.listFiles();
+
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Toast.makeText(MainActivity.this, "Compressing images...", Toast.LENGTH_LONG).show();
                 String selectedResolution = spinner.getSelectedItem().toString();
                 if (selectedResolution == "XGA - 1024x768") {
                     mHeight = 1024;
@@ -68,10 +73,17 @@ public class MainActivity extends AppCompatActivity {
                     mHeight = 1920;
                     mWidth = 1080;
                 }
-                String mImageNewPath = compressImage(imageOldPath);
+
+                if (fileList.length == 0) {
+                    Toast.makeText(MainActivity.this, "No images found in the directory", Toast.LENGTH_SHORT).show();
+                } else if (fileList.length != 0) {
+                    for (int i = 0; i < fileList.length; i++) {
+                        Log.d("Files", "FileName:" + fileList[i].getName());
+                        String newImage = compressImage(imageOldPath + fileList[i].getName());
+                    }
+                }
             }
         });
-
     }
 
 
@@ -196,10 +208,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public String getFilename() {
-        File file = new File(Environment.getExternalStorageDirectory().getPath(), "Compressed");
+        File file = new File(Environment.getExternalStorageDirectory(), "Compressed");
         if (!file.exists()) {
             file.mkdirs();
         }
+        Toast.makeText(MainActivity.this, "Image compressed and saved in 'Compressed' folder", Toast.LENGTH_LONG).show();
         String uriSting = (file.getAbsolutePath() + "/" + "IMG_" + System.currentTimeMillis() + ".png");
         return uriSting;
 
@@ -237,3 +250,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
 }
+
+/*String filepath = "/sdcard/Image/ic_launcher.jpg";
+   File imagefile = new File(filepath);
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(imagefile);
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        Bitmap bm = BitmapFactory.decodeStream(fis);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bm.compress(Bitmap.CompressFormat.JPEG, 100 , baos);
+        byte[] b = baos.toByteArray();
+
+        String encodedImage = Base64.encodeToString(b, Base64.DEFAULT);*/
